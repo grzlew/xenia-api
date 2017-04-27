@@ -52,8 +52,8 @@ class GiveAwayControllerSpec extends Specification {
         controller = new GiveAwayController(giveAwayRepository, prizeRepository, drawResultRepository)
         if (event == null) {
             event = eventRepository.save(new Event(1L, "Test event", DateTime.parse("2016-08-08T20:00:00")))
-            licenseKey = prizeRepository.save(new Prize("License key", "", false))
-            book = prizeRepository.save(new Prize("Book title", "", false))
+            licenseKey = prizeRepository.save(new Prize("License key", "", false, false))
+            book = prizeRepository.save(new Prize("Book title", "", false, false))
         }
     }
 
@@ -103,6 +103,50 @@ class GiveAwayControllerSpec extends Specification {
         and:
         giveAways.first().prize == book
     }
+
+    def "should require voucher code if prize is voucher typed"() {
+        setup:
+        def prize = new Prize(name: "intelilj", imageUrl: null, voucher: true, inactive: false)
+        prizeRepository.save(prize)
+        when:
+        controller.create(event, new CreateGiveAwayRequest(prize: prize.id, amount: 1, emailRequired: true))
+        then:
+        IllegalArgumentException ex = thrown()
+        ex.message == "Prize is voucher typed, voucher list required with amount size"
+    }
+
+    def "should save vouchers list if prize is voucher typed"() {
+        setup:
+        def prize = new Prize(name: "intelilj", imageUrl: null, voucher: true, inactive: false)
+        prizeRepository.save(prize)
+        when:
+        controller.create(event, new CreateGiveAwayRequest(
+                prize: prize.id,
+                amount: 2,
+                emailRequired: true,
+                vouchers: ["VOUCHER-1", "VOUCHER-2"]))
+        then:
+        def giveAways = controller.listAll(event)
+        def giveAway = giveAways.find { it.prize.id == prize.id }
+        giveAway.vouchers.voucher as Set == ['VOUCHER-1', 'VOUCHER-2'] as Set
+    }
+
+    def "should ignore vouchers list if prize is not voucher typed"() {
+        setup:
+        def prize = new Prize(name: "Clean Code by Uncle Bob", imageUrl: null, voucher: false, inactive: false)
+        prizeRepository.save(prize)
+        when:
+        controller.create(event, new CreateGiveAwayRequest(
+                prize: prize.id,
+                amount: 2,
+                emailRequired: false,
+                vouchers: ["VOUCHER-1", "VOUCHER-2"]))
+        then:
+        def giveAways = controller.listAll(event)
+        def giveAway = giveAways.find { it.prize.id == prize.id }
+        giveAway.vouchers as Set == [] as Set
+    }
+
 
     def "should also confirm that there are two prizes in the draw queue"() {
         when:

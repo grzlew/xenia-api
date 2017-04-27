@@ -130,7 +130,7 @@ class DrawResultControllerSpec extends Specification {
     }
 
     private GiveAway giveaway(String name, int amount = 1, boolean emailRequired = false) {
-        return giveAwayRepository.findByPrizeAndEvent(prize(name), event) ?: giveAwayRepository.save(new GiveAway(prize(name), event, amount, emailRequired))
+        return giveAwayRepository.findByPrizeAndEvent(prize(name), event) ?: giveAwayRepository.save(new GiveAway(prize(name), event, amount, emailRequired, null))
     }
 
     private DrawResult drawResult(GiveAway giveAway, Member member) {

@@ -25,6 +25,9 @@ final class GiveAway {
     @ManyToOne
     Event event
 
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    Set<Voucher> vouchers
+
     int amount
 
     @ColumnDefault("false")
@@ -32,10 +35,11 @@ final class GiveAway {
 
     private GiveAway() {}
 
-    GiveAway(Prize prize, Event event, int amount, boolean emailRequired) {
+    GiveAway(Prize prize, Event event, int amount, boolean emailRequired, Set<Voucher> vouchers) {
         this.prize = prize
         this.event = event
         this.amount = amount
         this.emailRequired = emailRequired
+        this.vouchers = vouchers
     }
 }

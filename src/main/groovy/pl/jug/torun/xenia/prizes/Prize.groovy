@@ -25,11 +25,16 @@ final class Prize {
     String imageUrl
 
     @ColumnDefault("false")
+    boolean voucher
+
+
+    @ColumnDefault("false")
     boolean inactive
 
     private Prize() {}
 
-    Prize(String name, String imageUrl, boolean inactive) {
+    Prize(String name, String imageUrl, boolean voucher, boolean inactive) {
+        this.voucher = voucher
         this.name = name
         this.imageUrl = imageUrl
         this.inactive = inactive

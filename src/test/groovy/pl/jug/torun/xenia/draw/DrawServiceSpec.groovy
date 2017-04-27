@@ -258,7 +258,7 @@ class DrawServiceSpec extends Specification {
     }
 
     private GiveAway giveAwayWithPrizeAndAmountAndEvent(String prize, int amount, Event event, boolean emailRequired = false) {
-        return giveAwayRepository.save(new GiveAway(prizeRepository.findByName(prize) ?: prizeRepository.save(new Prize(prize, "", false)), event, amount, emailRequired))
+        return giveAwayRepository.save(new GiveAway(prizeRepository.findByName(prize) ?: prizeRepository.save(new Prize(prize, "", false)), event, amount, emailRequired, null))
     }
 
     private Attendee attendee(String name, String email = "") {

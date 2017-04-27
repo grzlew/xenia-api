@@ -47,12 +47,18 @@ class GiveAwayController {
 
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json")
     public GiveAway create(@PathVariable("id") Event event, @Valid @RequestBody CreateGiveAwayRequest request) {
+        def prize = prizeRepository.findOne(request.prize)
         GiveAway giveAway = new GiveAway(
                 event: event,
-                prize: prizeRepository.findOne(request.prize),
+                prize: prize,
                 amount: request.amount,
+                vouchers: prize.voucher ? request.vouchers.collect { new Voucher(voucher: it) }: [],
                 emailRequired: request.emailRequired
         )
+
+        if (giveAway.prize.voucher && giveAway.vouchers?.size() != giveAway.amount) {
+            throw new IllegalArgumentException("Prize is voucher typed, voucher list required with amount size")
+        }
 
         return giveAwayRepository.save(giveAway)
     }
@@ -77,6 +83,7 @@ class GiveAwayController {
         long prize
         @Min(0L)
         int amount
+        Set<String> vouchers
         boolean emailRequired
     }
 
